@@ -50,7 +50,7 @@ class AlbumService:
             f.write(image_data)
 
         # Retornar URL relativa
-        cover_url = f"/storage/{artist_id}/{album_id}/{filename}"
+        cover_url = f"/{artist_id}/{album_id}/{filename}"
         print(f"[✓] Imagen guardada: {file_path}")
         print(f"[✓] URL generada: {cover_url}")
 
