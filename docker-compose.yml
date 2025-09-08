@@ -2,6 +2,15 @@
 version: "3.9"
 
 services:
+  rabbitmq:
+  image: rabbitmq:3-management
+  container_name: rabbitmq
+  ports:
+    - "5672:5672"     # Puerto para apps
+    - "15672:15672"   # Puerto para panel web de RabbitMQ
+  environment:
+    RABBITMQ_DEFAULT_USER: guest
+    RABBITMQ_DEFAULT_PASS: guest
   artist-service:
     build: ./artist-service
     container_name: artist-service
