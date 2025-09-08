@@ -3,74 +3,83 @@ version: "3.9"
 
 services:
   rabbitmq:
-  image: rabbitmq:3-management
-  container_name: rabbitmq
-  ports:
-    - "5672:5672"     # Puerto para apps
-    - "15672:15672"   # Puerto para panel web de RabbitMQ
-  environment:
-    RABBITMQ_DEFAULT_USER: guest
-    RABBITMQ_DEFAULT_PASS: guest
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"     # Puerto para apps
+      - "15672:15672"   # Puerto para panel web de RabbitMQ
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
   artist-service:
     build: ./artist-service
     container_name: artist-service
     ports:
-      - "8001:8001"
-    environment:
-      - DB_URL=${DB_URL_PY}
+      - "${ARTIST_PORT}:${ARTIST_PORT}"
+    env_file: .env
+    depends_on:
+      - rabbitmq
 
   content-service:
     build: ./content-service
     container_name: content-service
     ports:
-      - "8002:8002"
-    environment:
-      - DB_URL=${DB_URL_PY}
+      - "${CONTENT_PORT}:${CONTENT_PORT}"
+    env_file: .env
+    depends_on:
+      - rabbitmq
 
   playlist-service:
     build: ./playlist-service
     container_name: playlist-service
     ports:
-      - "8004:8004"
-    environment:
-      - DB_URL=${DB_URL_PY}
+      - "${PLAYLIST_PORT}:${PLAYLIST_PORT}"
+    env_file: .env
+    depends_on:
+      - rabbitmq
 
   search-service:
     build: ./search-service
     container_name: search-service
     ports:
-      - "8005:8005"
-    environment:
-      - DB_URL=${DB_URL_PY}
+      - "${SEARCH_PORT}:${SEARCH_PORT}"
+    env_file: .env
+    depends_on:
+      - rabbitmq
 
   subscription-service:
     build: ./subscription-service
     container_name: subscription-service
     ports:
-      - "8006:8006"
-    environment:
-      - DB_URL=${DB_URL_PY}
+      - "${SUBSCRIPTION_PORT}:${SUBSCRIPTION_PORT}"
+    env_file: .env
+    depends_on:
+      - rabbitmq
 
   auth-service:
     build: ./auth-service
     container_name: auth-service
     ports:
-      - "8080:8080"
-    environment:
-      - DB_URL=${DB_URL_GO}
+      - "${AUTH_PORT}:${AUTH_PORT}"
+    env_file: .env
+    depends_on:
+      - rabbitmq
 
   history-service:
     build: ./history-service
     container_name: history-service
     ports:
-      - "8081:8081"
-    environment:
-      - DB_URL=${DB_URL_GO}
+      - "${HISTORY_PORT}:${HISTORY_PORT}"
+    env_file: .env
+    depends_on:
+      - rabbitmq
 
   streaming-service:
     build: ./streaming-service
     container_name: streaming-service
     ports:
-      - "8082:8082"
-    environment:
-      - DB_URL=${DB_URL_GO}
+      - "${STREAMING_PORT}:${STREAMING_PORT}"
+    env_file: .env
+    depends_on:
+      - rabbitmq
