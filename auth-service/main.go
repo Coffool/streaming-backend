@@ -51,7 +51,7 @@ func main() {
 	auth.PUT("/update", handlers.UpdateUser(db))
 
 	// Puerto servidor
-	port := os.Getenv("PORT")
+	port := os.Getenv("AUTH_PORT")
 	if port == "" {
 		port = "8080"
 	}

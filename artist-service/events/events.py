@@ -1,8 +1,7 @@
 import json
 import aio_pika  # librería async para RabbitMQ
 from datetime import datetime, date
-
-RABBITMQ_URL = "amqp://guest:guest@localhost/"
+from config import settings
 
 
 def default_serializer(obj):
@@ -12,7 +11,7 @@ def default_serializer(obj):
 
 
 async def publish_artist_created_event(artist_data: dict):
-    connection = await aio_pika.connect_robust(RABBITMQ_URL)
+    connection = await aio_pika.connect_robust(settings.rabbitmq_url)
     async with connection:
         channel = await connection.channel()
         # Declaramos la cola (si no existe)

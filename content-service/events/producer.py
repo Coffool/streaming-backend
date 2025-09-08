@@ -1,12 +1,11 @@
 import json
 import aio_pika
-
-RABBITMQ_URL = "amqp://guest:guest@localhost/"
+from config import settings
 
 
 async def publish_event(queue_name: str, payload: dict):
     """Función genérica para publicar eventos"""
-    connection = await aio_pika.connect_robust(RABBITMQ_URL)
+    connection = await aio_pika.connect_robust(settings.rabbitmq_url)
     async with connection:
         channel = await connection.channel()
         queue = await channel.declare_queue(queue_name, durable=True)

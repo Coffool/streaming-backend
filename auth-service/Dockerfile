@@ -1,33 +1,65 @@
+# ======================================
+# Dockerfile genérico para microservicios Go
+# ======================================
+
+# ======================================
 # Etapa 1: Build
+# ======================================
 FROM golang:1.24.5 AS builder
 
-# Definir directorio de trabajo dentro del contenedor
+# Definir directorio de trabajo
 WORKDIR /app
 
-# Copiar go.mod y go.sum primero (para cachear dependencias)
+# Copiar archivos de dependencias primero para aprovechar cache de Docker
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copiar el resto del código
+# Copiar el resto del código fuente
 COPY . .
 
-# Compilar el binario para Linux (GOOS y GOARCH garantizan compatibilidad)
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o auth-service .
+# ARG para el nombre del servicio (se pasa desde docker-compose)
+ARG SERVICE_NAME=service
 
+# Compilar el binario para Linux con optimizaciones
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags='-w -s -extldflags "-static"' \
+    -a -installsuffix cgo \
+    -o ${SERVICE_NAME} .
+
+# ======================================
 # Etapa 2: Runtime
+# ======================================
 FROM alpine:3.19
 
-# Instalar certificados SSL (importante si haces requests HTTPS)
-RUN apk add --no-cache ca-certificates
+# Instalar dependencias mínimas del sistema
+RUN apk add --no-cache ca-certificates curl
+
+# Crear usuario no privilegiado para seguridad
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
 
 WORKDIR /app
 
-# Copiar solo el binario compilado desde la etapa anterior
-COPY --from=builder /app/auth-service .
+# ARGs para configuración dinámica
+ARG SERVICE_NAME=service
+ARG SERVICE_PORT=8080
 
-# Exponer el puerto del servicio
-EXPOSE 8080
+# Variables de entorno
+ENV SERVICE_NAME=${SERVICE_NAME}
+ENV PORT=${SERVICE_PORT}
 
-# Comando de inicio
-CMD ["./auth-service"]
+# Copiar binario desde la etapa de build con permisos correctos
+COPY --from=builder --chown=appuser:appgroup /app/${SERVICE_NAME} .
 
+# Cambiar a usuario no privilegiado
+USER appuser
+
+# Exponer puerto dinámico
+EXPOSE ${SERVICE_PORT}
+
+# Health check genérico
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/health || exit 1
+
+# Comando de inicio dinámico
+CMD ./${SERVICE_NAME}

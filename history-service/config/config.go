@@ -26,7 +26,7 @@ func GetConfig() *Config {
 		_ = godotenv.Load()
 
 		instance = &Config{
-			Port:      getEnv("PORT", "8005"),
+			Port:      getEnv("HISTORY_PORT", "8005"),
 			JWTSecret: getEnv("JWT_SECRET", "defaultsecret"),
 			DBURL:     getEnv("DB_URL", "postgres://user:pass@localhost:5432/dbname?sslmode=disable"),
 			RabbitURL: getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost/"),

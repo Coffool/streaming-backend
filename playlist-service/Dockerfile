@@ -40,4 +40,4 @@ EXPOSE 8004
 # Comando para ejecutar el servidor FastAPI con Uvicorn
 # --host 0.0.0.0 permite que sea accesible desde fuera del contenedor
 # --port 8001 puerto del contenedor
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8004", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8004"]

@@ -9,8 +9,6 @@ from core.services.album_service import AlbumService
 from core.services.artist_lookup import ArtistLookupService
 from config import settings
 
-RABBITMQ_URL = "amqp://guest:guest@localhost/"
-
 
 def create_artist_folder_structure(artist_id: str, album_id: int) -> None:
     """
@@ -94,7 +92,7 @@ async def handle_artist_created(message: AbstractIncomingMessage) -> None:
 
 async def consume_events():
     """Suscripción a la cola de eventos de artistas"""
-    connection = await aio_pika.connect_robust(RABBITMQ_URL)
+    connection = await aio_pika.connect_robust(settings.rabbitmq_url)
     channel = await connection.channel()
     queue = await channel.declare_queue("artist_created", durable=True)
     await queue.consume(handle_artist_created)
