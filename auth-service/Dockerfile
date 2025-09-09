@@ -57,9 +57,5 @@ USER appuser
 # Exponer puerto dinámico
 EXPOSE ${SERVICE_PORT}
 
-# Health check genérico
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/health || exit 1
-
 # Comando de inicio dinámico
 CMD ./${SERVICE_NAME}
