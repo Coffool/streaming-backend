@@ -1,0 +1,41 @@
+{
+	"info": {
+		"_postman_id": "ef535d49-aa61-4229-9406-f2606beb3ece",
+		"name": "history-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47867232",
+		"_collection_link": "https://coffool-s-team.postman.co/workspace/Team-Workspace~5c5bfb82-6e45-4b37-80eb-de3596f7fd5a/collection/47867232-ef535d49-aa61-4229-9406-f2606beb3ece?action=share&source=collection_link&creator=47867232"
+	},
+	"item": [
+		{
+			"name": "history",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/history",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"history"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

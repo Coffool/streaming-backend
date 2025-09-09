@@ -1,0 +1,138 @@
+{
+	"info": {
+		"_postman_id": "86ce6105-a0e5-431d-afdd-18862e9daa8c",
+		"name": "subscription-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47867232",
+		"_collection_link": "https://coffool-s-team.postman.co/workspace/Team-Workspace~5c5bfb82-6e45-4b37-80eb-de3596f7fd5a/collection/47867232-86ce6105-a0e5-431d-afdd-18862e9daa8c?action=share&source=collection_link&creator=47867232"
+	},
+	"item": [
+		{
+			"name": "subscribe",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8005/subscriptions/subscribe/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8005",
+					"path": [
+						"subscriptions",
+						"subscribe",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "unsubscribe",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8005/subscriptions/unsubscribe/1\n",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8005",
+					"path": [
+						"subscriptions",
+						"unsubscribe",
+						"1\n"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "subscribed",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8005/subscriptions/status/1\n",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8005",
+					"path": [
+						"subscriptions",
+						"status",
+						"1\n"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "subscriptions",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8005/subscriptions/my-subscriptions\n",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8005",
+					"path": [
+						"subscriptions",
+						"my-subscriptions\n"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,305 @@
+{
+	"info": {
+		"_postman_id": "e9c58b5f-d136-498f-9572-ce9f93f327a2",
+		"name": "playlist-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47867232",
+		"_collection_link": "https://coffool-s-team.postman.co/workspace/Team-Workspace~5c5bfb82-6e45-4b37-80eb-de3596f7fd5a/collection/47867232-e9c58b5f-d136-498f-9572-ce9f93f327a2?action=share&source=collection_link&creator=47867232"
+	},
+	"item": [
+		{
+			"name": "create-playlist",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"name\": \"Mi Playlist Favorita\",\n\"description\": \"Una colección de mis canciones favoritas para relajarme\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8006/playlists/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8006",
+					"path": [
+						"playlists",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-playlist",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"name\": \"Ayuda\",\n\"description\": \"Tengo sueño y hambre\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8006/playlists/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8006",
+					"path": [
+						"playlists",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-playlist",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8006/playlists/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8006",
+					"path": [
+						"playlists",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-playlist",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8006/playlists/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8006",
+					"path": [
+						"playlists",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add-song",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"song_id\": 2}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8006/playlists/2/songs",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8006",
+					"path": [
+						"playlists",
+						"2",
+						"songs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remove-song",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8006/playlists/2/songs/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8006",
+					"path": [
+						"playlists",
+						"2",
+						"songs",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-songs",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8006/playlists/2/songs",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8006",
+					"path": [
+						"playlists",
+						"2",
+						"songs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-all",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8006/playlists/get/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8006",
+					"path": [
+						"playlists",
+						"get",
+						"all"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,362 @@
+{
+	"info": {
+		"_postman_id": "0d00f0d1-6e64-46a1-8718-c0ae73075830",
+		"name": "content-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47867232",
+		"_collection_link": "https://coffool-s-team.postman.co/workspace/Team-Workspace~5c5bfb82-6e45-4b37-80eb-de3596f7fd5a/collection/47867232-0d00f0d1-6e64-46a1-8718-c0ae73075830?action=share&source=collection_link&creator=47867232"
+	},
+	"item": [
+		{
+			"name": "create-album",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "multipart/form-data",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "Beyaqueo",
+							"type": "text"
+						},
+						{
+							"key": "release_date",
+							"value": "2025-09-01",
+							"type": "text"
+						},
+						{
+							"key": "cover_image",
+							"type": "file",
+							"src": "/home/coffool/Downloads/blue-circle-with-white-user_78370-4707.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8002/albums/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"albums",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-album",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "Nuevo titulo",
+							"type": "text"
+						},
+						{
+							"key": "release_date",
+							"value": "2025-10-01",
+							"type": "text"
+						},
+						{
+							"key": "cover_image",
+							"type": "file",
+							"src": "/home/coffool/Downloads/pp.jpeg"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8002/albums/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"albums",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create-song",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "multipart/form-data",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "aaa",
+							"type": "text"
+						},
+						{
+							"key": "album_id",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "track_number",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "audio_file",
+							"type": "file",
+							"src": "/home/coffool/Music/the-last-point-beat-electronic-digital-394291.mp3"
+						},
+						{
+							"key": "artist_ids",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "genre_id",
+							"value": "1",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8002/songs/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"songs",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-song",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "Nuevo titulo",
+							"type": "text"
+						},
+						{
+							"key": "track_number",
+							"value": "5",
+							"type": "text"
+						},
+						{
+							"key": "genre_id",
+							"value": "1",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8002/songs/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"songs",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-album",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8002/albums/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"albums",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-song",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8002/songs/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"songs",
+						"1"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-song",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8002/songs/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"songs",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-albumPublic",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8002/albums/artist/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"albums",
+						"artist",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

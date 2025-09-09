@@ -1,0 +1,64 @@
+{
+	"info": {
+		"_postman_id": "f8fa1beb-11ae-44bb-b40a-949bdeac3596",
+		"name": "search-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47867232",
+		"_collection_link": "https://coffool-s-team.postman.co/workspace/Team-Workspace~5c5bfb82-6e45-4b37-80eb-de3596f7fd5a/collection/47867232-f8fa1beb-11ae-44bb-b40a-949bdeac3596?action=share&source=collection_link&creator=47867232"
+	},
+	"item": [
+		{
+			"name": "search",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8005/search/search?q=aa&song_page=1&album_page=1&artist_page=1&limit=5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8005",
+					"path": [
+						"search",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "aa"
+						},
+						{
+							"key": "song_page",
+							"value": "1"
+						},
+						{
+							"key": "album_page",
+							"value": "1"
+						},
+						{
+							"key": "artist_page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
