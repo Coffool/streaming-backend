@@ -41,8 +41,8 @@ class SongRepository:
 
     async def get_artist_id_by_song(self, song_id: int) -> int | None:
         stmt = (
-            select(Artist.user_id)
-            .select_from(Song)  # 🔹 Aquí indicamos que la consulta parte de Song
+            select(Artist.id)  # 🔹 Ahora seleccionamos el artist_id
+            .select_from(Song)
             .join(Album, Album.id == Song.album_id)
             .join(Artist, Artist.id == Album.artist_id)
             .where(Song.id == song_id)
