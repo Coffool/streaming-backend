@@ -1,4 +1,4 @@
-// services/user_service.go
+// Package services contiene la lógica de negocio para usuarios.
 package services
 
 import (
@@ -11,6 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// RegisterRequest representa la solicitud para registrar un nuevo usuario.
 type RegisterRequest struct {
 	Username  string `json:"username" binding:"required,min=3,max=20"`
 	Email     string `json:"email" binding:"required,email"`
@@ -18,6 +19,7 @@ type RegisterRequest struct {
 	Birthdate string `json:"birthdate" binding:"required"`
 }
 
+// UpdateRequest representa la solicitud para actualizar la información de un usuario.
 type UpdateRequest struct {
 	Name     string `json:"name"`
 	Username string `json:"username"`
@@ -25,6 +27,7 @@ type UpdateRequest struct {
 	Password string `json:"password"`
 }
 
+// UserResponse representa la respuesta con los datos básicos de un usuario.
 type UserResponse struct {
 	ID        uint   `json:"id"`
 	Name      string `json:"name"`
@@ -34,6 +37,7 @@ type UserResponse struct {
 	Birthdate string `json:"birthdate,omitempty"`
 }
 
+// UserDetailResponse representa la respuesta con los datos completos de un usuario.
 type UserDetailResponse struct {
 	ID                 uint        `json:"id"`
 	Name               string      `json:"name"`
@@ -47,42 +51,48 @@ type UserDetailResponse struct {
 	LastPasswordChange interface{} `json:"last_password_change"`
 }
 
+// UserServiceInterface define las operaciones disponibles para gestionar usuarios.
 type UserServiceInterface interface {
+	// RegisterUser registra un nuevo usuario en la base de datos.
 	RegisterUser(req RegisterRequest) (*UserResponse, error)
+
+	// UpdateUser actualiza la información de un usuario existente.
 	UpdateUser(userID uint, req UpdateRequest) (*UserResponse, error)
+
+	// GetUserDetails obtiene los detalles completos de un usuario.
 	GetUserDetails(userID uint) (*UserDetailResponse, error)
 }
 
+// UserService implementa UserServiceInterface usando un repositorio de usuarios.
 type UserService struct {
 	userRepo repositories.UserRepositoryInterface
 }
 
+// NewUserService crea una nueva instancia de UserService.
 func NewUserService(userRepo repositories.UserRepositoryInterface) UserServiceInterface {
 	return &UserService{
 		userRepo: userRepo,
 	}
 }
 
+// RegisterUser registra un nuevo usuario, validando duplicados
+// y almacenando la contraseña encriptada.
 func (s *UserService) RegisterUser(req RegisterRequest) (*UserResponse, error) {
-	// Parse birthdate
 	birthdate, err := time.Parse("2006-01-02", req.Birthdate)
 	if err != nil {
 		return nil, errors.New("fecha inválida, formato esperado YYYY-MM-DD")
 	}
 
-	// Verificar si username o email ya existen
 	_, err = s.userRepo.FindByUsernameOrEmail(req.Username, req.Email)
 	if err == nil {
 		return nil, errors.New("usuario o email ya registrados")
 	}
 
-	// Encriptar contraseña
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, errors.New("no se pudo encriptar la contraseña")
 	}
 
-	// Crear usuario
 	user := &models.User{
 		Name:         "user",
 		Role:         "user",
@@ -106,14 +116,13 @@ func (s *UserService) RegisterUser(req RegisterRequest) (*UserResponse, error) {
 	}, nil
 }
 
+// UpdateUser actualiza los datos de un usuario, validando duplicados y formato.
 func (s *UserService) UpdateUser(userID uint, req UpdateRequest) (*UserResponse, error) {
-	// Obtener usuario existente
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return nil, errors.New("usuario no encontrado")
 	}
 
-	// Actualizar campos
 	if req.Name != "" {
 		user.Name = req.Name
 	}
@@ -130,7 +139,6 @@ func (s *UserService) UpdateUser(userID uint, req UpdateRequest) (*UserResponse,
 	}
 
 	if req.Email != "" && req.Email != user.Email {
-		// Validar formato de email
 		matched, _ := regexp.MatchString(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`, req.Email)
 		if !matched {
 			return nil, errors.New("formato de email inválido")
@@ -158,7 +166,6 @@ func (s *UserService) UpdateUser(userID uint, req UpdateRequest) (*UserResponse,
 		user.Password = string(hashedPassword)
 	}
 
-	// Guardar cambios
 	if err := s.userRepo.Update(user); err != nil {
 		return nil, errors.New("no se pudo actualizar el usuario")
 	}
@@ -172,6 +179,7 @@ func (s *UserService) UpdateUser(userID uint, req UpdateRequest) (*UserResponse,
 	}, nil
 }
 
+// GetUserDetails devuelve los detalles completos de un usuario.
 func (s *UserService) GetUserDetails(userID uint) (*UserDetailResponse, error) {
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
@@ -192,7 +200,7 @@ func (s *UserService) GetUserDetails(userID uint) (*UserDetailResponse, error) {
 	}, nil
 }
 
-// formatTimePointer formatea un puntero a time.Time para JSON
+// formatTimePointer convierte un *time.Time en string formateado o nil.
 func formatTimePointer(t *time.Time) interface{} {
 	if t == nil {
 		return nil

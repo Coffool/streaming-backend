@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Logout maneja el cierre de sesión de un usuario eliminando su refresh token
 func Logout(authService services.AuthServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Obtener user_id del contexto

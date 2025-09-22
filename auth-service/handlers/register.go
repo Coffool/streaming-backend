@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Register maneja el registro de un nuevo usuario
 func Register(userService services.UserServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var input services.RegisterRequest
@@ -20,7 +21,6 @@ func Register(userService services.UserServiceInterface) gin.HandlerFunc {
 		if err != nil {
 			statusCode := http.StatusInternalServerError
 
-			// Mapear errores específicos a códigos de estado apropiados
 			switch err.Error() {
 			case "fecha inválida, formato esperado YYYY-MM-DD":
 				statusCode = http.StatusBadRequest

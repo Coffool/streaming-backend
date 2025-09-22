@@ -1,3 +1,4 @@
+// Package handlers contiene los handlers del microservicio
 package handlers
 
 import (
@@ -7,16 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetCurrentUser devuelve la informacion de un usuario segun su user_id
 func GetCurrentUser(userService services.UserServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Obtener el ID del usuario desde el middleware de autenticación
 		userIDInterface, exists := c.Get("user_id")
 		if !exists {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "no autorizado"})
 			return
 		}
 
-		// Convertir a uint (el middleware puede enviar diferentes tipos)
 		var userID uint
 		switch v := userIDInterface.(type) {
 		case uint:

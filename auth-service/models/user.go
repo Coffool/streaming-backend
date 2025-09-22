@@ -11,14 +11,13 @@ type User struct {
 	Password           string    `gorm:"not null"`
 	Role               string    `gorm:"not null"`
 	Birthdate          time.Time `gorm:"not null"`
-	Registerdate       time.Time `gorm:"autoCreateTime"` // se llena al crear
+	Registerdate       time.Time `gorm:"autoCreateTime"`
 	LastUsernameChange *time.Time
 	LastEmailChange    *time.Time
 	LastPasswordChange *time.Time
 }
 
 // TableName especifica el nombre de la tabla con su esquema.
-// Esto es lo que permite a GORM encontrar la tabla en el esquema correcto.
 func (User) TableName() string {
 	return "music_streaming.users"
 }

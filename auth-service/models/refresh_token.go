@@ -1,3 +1,4 @@
+// Package models contiene los modelos de datos del microservicio
 package models
 
 import "time"
@@ -9,9 +10,7 @@ type RefreshToken struct {
 	Token     string    `gorm:"not null"`
 	ExpiresAt time.Time `gorm:"not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
-
-	// Relación con usuario. GORM usará el método TableName() del struct User.
-	User User `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 // TableName especifica el nombre de la tabla con su esquema

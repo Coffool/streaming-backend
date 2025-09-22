@@ -1,10 +1,11 @@
+// Package services contiene la lógica de negocio para autenticación y autorización.
 package services
 
 import (
+	"auth-service/config"
 	"auth-service/models"
 	"auth-service/repositories"
 	"errors"
-	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -12,10 +13,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// RefreshRequest representa la solicitud para renovar un token de acceso.
 type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
 }
 
+// RefreshResponse representa la respuesta al renovar un token de acceso.
 type RefreshResponse struct {
 	Message      string `json:"message"`
 	AccessToken  string `json:"access_token"`
@@ -23,17 +26,27 @@ type RefreshResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 }
 
+// AuthServiceInterface define las operaciones de autenticación
+// y manejo de tokens que el servicio debe implementar.
 type AuthServiceInterface interface {
+	// Login autentica a un usuario con credenciales y genera tokens.
 	Login(req LoginRequest) (*LoginResponse, error)
+
+	// RefreshToken genera un nuevo access token a partir de un refresh token válido.
 	RefreshToken(req RefreshRequest) (*RefreshResponse, error)
+
+	// Logout elimina los refresh tokens asociados a un usuario.
 	Logout(userID uint) error
 }
 
+// AuthService implementa AuthServiceInterface, coordinando
+// usuarios y refresh tokens a través de repositorios.
 type AuthService struct {
 	userRepo         repositories.UserRepositoryInterface
 	refreshTokenRepo repositories.RefreshTokenRepositoryInterface
 }
 
+// NewAuthService crea una nueva instancia de AuthService.
 func NewAuthService(userRepo repositories.UserRepositoryInterface, refreshTokenRepo repositories.RefreshTokenRepositoryInterface) AuthServiceInterface {
 	return &AuthService{
 		userRepo:         userRepo,
@@ -41,68 +54,44 @@ func NewAuthService(userRepo repositories.UserRepositoryInterface, refreshTokenR
 	}
 }
 
+// RefreshToken genera un nuevo access token utilizando un refresh token válido.
+// Si el refresh token está cerca de expirar, también se rota por uno nuevo.
 func (s *AuthService) RefreshToken(req RefreshRequest) (*RefreshResponse, error) {
 	now := time.Now()
 
-	// Buscar refresh token en DB
 	stored, err := s.refreshTokenRepo.FindByToken(req.RefreshToken)
 	if err != nil {
 		return nil, errors.New("no se pudo renovar el token")
 	}
 
-	// Verificar expiración
 	if now.After(stored.ExpiresAt) {
 		return nil, errors.New("no se pudo renovar el token")
 	}
 
-	// Buscar usuario asociado
 	user, err := s.userRepo.FindByID(stored.UserID)
 	if err != nil {
 		return nil, errors.New("no se pudo renovar el token")
 	}
 
-	// Generar nuevo access token
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		secret = "defaultsecret"
-	}
-
-	accessTTLStr := os.Getenv("ACCESS_TOKEN_TTL")
-	if accessTTLStr == "" {
-		accessTTLStr = "15m" // valor por defecto
-	}
-	accessTTL, err := time.ParseDuration(accessTTLStr)
-	if err != nil {
-		accessTTL = 15 * time.Minute // fallback
-	}
+	cfg := config.AppConfig
 
 	claims := jwt.MapClaims{
 		"user_id":  user.ID,
 		"username": user.Username,
 		"email":    user.Email,
 		"role":     user.Role,
-		"exp":      now.Add(accessTTL).Unix(),
+		"exp":      now.Add(cfg.AccessTokenTTL).Unix(),
 	}
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	accessTokenString, err := accessToken.SignedString([]byte(secret))
+	accessTokenString, err := accessToken.SignedString([]byte(cfg.JWTSecret))
 	if err != nil {
 		return nil, errors.New("no se pudo generar access token")
 	}
 
-	// Rotar refresh token si está cerca de expirar (<20% de TTL)
-	refreshTTLStr := os.Getenv("REFRESH_TOKEN_TTL")
-	if refreshTTLStr == "" {
-		refreshTTLStr = "7d" // valor por defecto
-	}
-	refreshTTL, err := time.ParseDuration(refreshTTLStr)
-	if err != nil {
-		refreshTTL = 7 * 24 * time.Hour // fallback
-	}
-
-	if stored.ExpiresAt.Sub(now) < refreshTTL/5 {
+	if stored.ExpiresAt.Sub(now) < cfg.RefreshTokenTTL/5 {
 		stored.Token = uuid.New().String()
-		stored.ExpiresAt = now.Add(refreshTTL)
+		stored.ExpiresAt = now.Add(cfg.RefreshTokenTTL)
 		if err := s.refreshTokenRepo.Update(stored); err != nil {
 			return nil, errors.New("error actualizando refresh token")
 		}
@@ -112,19 +101,23 @@ func (s *AuthService) RefreshToken(req RefreshRequest) (*RefreshResponse, error)
 		Message:      "token renovado exitosamente",
 		AccessToken:  accessTokenString,
 		RefreshToken: stored.Token,
-		ExpiresIn:    int(accessTTL.Seconds()),
+		ExpiresIn:    cfg.GetAccessTokenTTLSeconds(),
 	}, nil
 }
 
+// Logout elimina todos los refresh tokens asociados al usuario.
 func (s *AuthService) Logout(userID uint) error {
 	return s.refreshTokenRepo.DeleteByUserID(userID)
 }
 
+// LoginRequest representa la solicitud de inicio de sesión
+// con identificador (usuario o email) y contraseña.
 type LoginRequest struct {
 	Identifier string `json:"identifier" binding:"required"`
 	Password   string `json:"password" binding:"required"`
 }
 
+// LoginResponse representa la respuesta de un inicio de sesión exitoso.
 type LoginResponse struct {
 	Message      string      `json:"message"`
 	AccessToken  string      `json:"access_token"`
@@ -133,6 +126,7 @@ type LoginResponse struct {
 	User         UserSummary `json:"user"`
 }
 
+// UserSummary contiene la información básica de un usuario autenticado.
 type UserSummary struct {
 	ID       uint   `json:"id"`
 	Username string `json:"username"`
@@ -140,68 +134,39 @@ type UserSummary struct {
 	Role     string `json:"role"`
 }
 
+// Login autentica al usuario con sus credenciales, genera un access token
+// y un refresh token nuevo, eliminando cualquier token previo del usuario.
 func (s *AuthService) Login(req LoginRequest) (*LoginResponse, error) {
-	// Buscar usuario por username o email
 	user, err := s.userRepo.FindByUsernameOrEmail(req.Identifier, req.Identifier)
 	if err != nil {
 		return nil, errors.New("usuario no encontrado")
 	}
 
-	// Comparar contraseña
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		return nil, errors.New("contraseña incorrecta")
 	}
 
-	// JWT_SECRET
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		secret = "defaultsecret"
-	}
+	cfg := config.AppConfig
 
-	// Access Token TTL
-	accessTTLStr := os.Getenv("ACCESS_TOKEN_TTL")
-	if accessTTLStr == "" {
-		accessTTLStr = "15m"
-	}
-	accessTTL, err := time.ParseDuration(accessTTLStr)
-	if err != nil {
-		accessTTL = 15 * time.Minute
-	}
-
-	// Crear claims para el access token
 	claims := jwt.MapClaims{
 		"user_id":  user.ID,
 		"username": user.Username,
 		"email":    user.Email,
 		"role":     user.Role,
-		"exp":      time.Now().Add(accessTTL).Unix(),
+		"exp":      time.Now().Add(cfg.AccessTokenTTL).Unix(),
 	}
 
-	// Generar access token
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	accessTokenString, err := accessToken.SignedString([]byte(secret))
+	accessTokenString, err := accessToken.SignedString([]byte(cfg.JWTSecret))
 	if err != nil {
 		return nil, errors.New("no se pudo generar access token")
 	}
 
-	// Refresh Token TTL
-	refreshTTLStr := os.Getenv("REFRESH_TOKEN_TTL")
-	if refreshTTLStr == "" {
-		refreshTTLStr = "7d"
-	}
-	refreshTTL, err := time.ParseDuration(refreshTTLStr)
-	if err != nil {
-		refreshTTL = 7 * 24 * time.Hour
-	}
-
-	// Generar refresh token
 	refreshToken := uuid.New().String()
-	expiry := time.Now().Add(refreshTTL)
+	expiry := time.Now().Add(cfg.RefreshTokenTTL)
 
-	// Limpiar refresh tokens anteriores del usuario
 	s.refreshTokenRepo.DeleteByUserID(user.ID)
 
-	// Crear nuevo refresh token
 	newRT := &models.RefreshToken{
 		UserID:    user.ID,
 		Token:     refreshToken,
@@ -216,7 +181,7 @@ func (s *AuthService) Login(req LoginRequest) (*LoginResponse, error) {
 		Message:      "login exitoso",
 		AccessToken:  accessTokenString,
 		RefreshToken: refreshToken,
-		ExpiresIn:    int(accessTTL.Seconds()),
+		ExpiresIn:    cfg.GetAccessTokenTTLSeconds(),
 		User: UserSummary{
 			ID:       user.ID,
 			Username: user.Username,

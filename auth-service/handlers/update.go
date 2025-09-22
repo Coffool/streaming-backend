@@ -1,4 +1,3 @@
-// handlers/update.go (corregido)
 package handlers
 
 import (
@@ -8,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// UpdateUser maneja la actualización de la información del usuario verificando la identidad mediante el user_id del JWT
 func UpdateUser(userService services.UserServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Obtener el user_id del JWT
@@ -23,7 +23,6 @@ func UpdateUser(userService services.UserServiceInterface) gin.HandlerFunc {
 			return
 		}
 
-		// Convertir a uint (manejo robusto de diferentes tipos que puede enviar JWT)
 		var userID uint
 		switch v := uid.(type) {
 		case uint:
@@ -41,7 +40,6 @@ func UpdateUser(userService services.UserServiceInterface) gin.HandlerFunc {
 		if err != nil {
 			statusCode := http.StatusInternalServerError
 
-			// Mapear errores específicos a códigos de estado apropiados
 			switch err.Error() {
 			case "usuario no encontrado":
 				statusCode = http.StatusNotFound
