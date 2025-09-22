@@ -3,6 +3,8 @@ package main
 import (
 	"auth-service/handlers"
 	"auth-service/middleware"
+	"auth-service/repositories"
+	"auth-service/services"
 	"fmt"
 	"log"
 	"os"
@@ -26,7 +28,7 @@ func main() {
 	// DSN de conexión
 	dsn := os.Getenv("DB_URL")
 	if dsn == "" {
-		log.Fatal("❌ No se encontró la variable de entorno DB_DSN")
+		log.Fatal("❌ No se encontró la variable de entorno DB_URL")
 	}
 
 	// Conectar PostgreSQL y deshabilitar sentencias preparadas
@@ -39,24 +41,35 @@ func main() {
 	}
 	log.Println("✅ PostgreSQL conectado")
 
+	// Inicializar repositorios
+	userRepo := repositories.NewUserRepository(db)
+	refreshTokenRepo := repositories.NewRefreshTokenRepository(db)
+
+	// Inicializar servicios
+	userService := services.NewUserService(userRepo)
+	authService := services.NewAuthService(userRepo, refreshTokenRepo)
+
 	// Router
 	r := gin.Default()
-	r.POST("/register", handlers.Register(db))
-	r.POST("/login", handlers.Login(db))
-	r.POST("/refresh", handlers.Refresh(db)) // endpoint de refresh token
+
+	// Rutas públicas
+	r.POST("/register", handlers.Register(userService))
+	r.POST("/login", handlers.Login(authService))
+	r.POST("/refresh", handlers.Refresh(authService))
 
 	// Rutas protegidas
 	auth := r.Group("/", middleware.AuthMiddleware())
-	auth.POST("/logout", handlers.Logout(db))
-	auth.PUT("/update", handlers.UpdateUser(db))
+	auth.POST("/logout", handlers.Logout(authService))
+	auth.PUT("/update", handlers.UpdateUser(userService))
+	auth.GET("/user/me", handlers.GetCurrentUser(userService)) // Solo información del usuario actual
 
 	// Puerto servidor
 	port := os.Getenv("AUTH_PORT")
 	if port == "" {
 		port = "8080"
 	}
-	fmt.Printf("🚀 Auth-Service corriendo en http://localhost:%s\n", port)
 
+	fmt.Printf("🚀 Auth-Service corriendo en http://localhost:%s\n", port)
 	if err := r.Run(":" + port); err != nil {
 		log.Fatal("❌ Error arrancando servidor:", err)
 	}
