@@ -16,6 +16,7 @@ type RegisterInput struct {
 	Email     string `json:"email" binding:"required,email"`
 	Password  string `json:"password" binding:"required,min=8"`
 	Birthdate string `json:"birthdate" binding:"required"` // formato: YYYY-MM-DD
+	IsArtist  bool   `json:"is_artist"`
 }
 
 func Register(db *gorm.DB) gin.HandlerFunc {
@@ -47,9 +48,14 @@ func Register(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		role := "user"
+		if input.IsArtist {
+			role = "artist"
+		}
+
 		user := models.User{
 			Name:         "user",
-			Role:         "user",
+			Role:         role,
 			Username:     input.Username,
 			Email:        input.Email,
 			Password:     string(hashedPassword),

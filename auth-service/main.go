@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -41,6 +43,18 @@ func main() {
 
 	// Router
 	r := gin.Default()
+
+	// Configurar CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173"}, // URLs comunes de desarrollo React/Vite
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+	
+	// Rutas públicas
 	r.POST("/register", handlers.Register(db))
 	r.POST("/login", handlers.Login(db))
 	r.POST("/refresh", handlers.Refresh(db)) // endpoint de refresh token
