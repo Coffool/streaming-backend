@@ -1,14 +1,14 @@
 package handlers
 
 import (
-	"auth-service/models"
+	"auth-service/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-func Logout(db *gorm.DB) gin.HandlerFunc {
+// Logout maneja el cierre de sesión de un usuario eliminando su refresh token
+func Logout(authService services.AuthServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Obtener user_id del contexto
 		userIDAny, exists := c.Get("user_id")
@@ -17,11 +17,25 @@ func Logout(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// JWT numérico viene como float64
-		userID := uint(userIDAny.(float64))
+		// Convertir a uint (manejo robusto de diferentes tipos)
+		var userID uint
+		switch v := userIDAny.(type) {
+		case uint:
+			userID = v
+		case float64:
+			userID = uint(v)
+		case int:
+			userID = uint(v)
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "error procesando ID de usuario"})
+			return
+		}
 
-		// Eliminar refresh token de DB
-		db.Where("user_id = ?", userID).Delete(&models.RefreshToken{})
+		err := authService.Logout(userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "error cerrando sesión"})
+			return
+		}
 
 		c.JSON(http.StatusOK, gin.H{
 			"message": "logged_out",

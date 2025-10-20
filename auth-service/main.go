@@ -1,14 +1,14 @@
 package main
 
 import (
+	"auth-service/config"
 	"auth-service/handlers"
 	"auth-service/middleware"
+	"auth-service/repositories"
+	"auth-service/services"
 	"fmt"
 	"log"
-	"os"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -16,24 +16,17 @@ import (
 )
 
 func main() {
-	// Solo cargar .env en desarrollo
-	if os.Getenv("GO_ENV") != "production" {
-		if err := godotenv.Load(); err != nil {
-			log.Println("⚠️ No se encontró archivo .env, usando variables de entorno del sistema")
-		} else {
-			log.Println("✅ Archivo .env cargado")
-		}
+	// Cargar variables de entorno (.env opcional en desarrollo)
+	if err := godotenv.Load(); err != nil {
+		log.Println("⚠️ No se encontró archivo .env, usando variables de entorno del sistema")
+	} else {
+		log.Println("✅ Archivo .env cargado")
 	}
 
-	// DSN de conexión
-	dsn := os.Getenv("DB_URL")
-	if dsn == "" {
-		log.Fatal("❌ No se encontró la variable de entorno DB_DSN")
-	}
+	cfg := config.LoadConfig()
 
-	// Conectar PostgreSQL y deshabilitar sentencias preparadas
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		// Esto resuelve el error de "prepared statement already exists"
+	// Conexión a PostgreSQL
+	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{
 		PrepareStmt: false,
 	})
 	if err != nil {
@@ -41,37 +34,30 @@ func main() {
 	}
 	log.Println("✅ PostgreSQL conectado")
 
+	// Repositorios
+	userRepo := repositories.NewUserRepository(db)
+	refreshTokenRepo := repositories.NewRefreshTokenRepository(db)
+
+	// Servicios
+	userService := services.NewUserService(userRepo)
+	authService := services.NewAuthService(userRepo, refreshTokenRepo)
+
 	// Router
 	r := gin.Default()
 
-	// Configurar CORS
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173"}, // URLs comunes de desarrollo React/Vite
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-	
 	// Rutas públicas
-	r.POST("/register", handlers.Register(db))
-	r.POST("/login", handlers.Login(db))
-	r.POST("/refresh", handlers.Refresh(db)) // endpoint de refresh token
+	r.POST("/register", handlers.Register(userService))
+	r.POST("/login", handlers.Login(authService))
+	r.POST("/refresh", handlers.Refresh(authService))
 
 	// Rutas protegidas
 	auth := r.Group("/", middleware.AuthMiddleware())
-	auth.POST("/logout", handlers.Logout(db))
-	auth.PUT("/update", handlers.UpdateUser(db))
+	auth.POST("/logout", handlers.Logout(authService))
+	auth.PUT("/update", handlers.UpdateUser(userService))
+	auth.GET("/user/me", handlers.GetCurrentUser(userService))
 
-	// Puerto servidor
-	port := os.Getenv("AUTH_PORT")
-	if port == "" {
-		port = "8080"
-	}
-	fmt.Printf("🚀 Auth-Service corriendo en http://localhost:%s\n", port)
-
-	if err := r.Run(":" + port); err != nil {
+	fmt.Printf("🚀 Auth-Service corriendo en http://localhost:%s\n", cfg.Port)
+	if err := r.Run(":" + cfg.Port); err != nil {
 		log.Fatal("❌ Error arrancando servidor:", err)
 	}
 }
